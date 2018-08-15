@@ -55,23 +55,27 @@
 @implementation CustomUrlSchemeHandler
 
 - (void) webView: (WKWebView *) webView startURLSchemeTask:(nonnull id <WKURLSchemeTask>) urlSchemeTask {
-    NSLog(@"Start called for custom URL scheme handler for alp://");
+    NSLog(@"Start called for custom URL scheme handler for alpha-local://");
     NSURL *url = urlSchemeTask.request.URL;
     NSString *thisURL = url.absoluteString;
     _task = urlSchemeTask;
     
-    NSString *imageSignature = @"alpha-local://image?url=file://";
-    NSString *audioSignature = @"alpha-local://audio?url=file://";
-    NSString *videoSignature = @"alpha-local://video?url=file://";
+   
+    NSString *jpgImageSignature = @"alpha-local://jpg-image?url=file://";
+    NSString *pngImageSignature = @"alpha-local://png-image?url=file://";
+    NSString *audioSignature =    @"alpha-local://audio?url=file://";
+    NSString *videoSignature =    @"alpha-local://video?url=file://";
     
     //set defaults to handle images
-    NSString *thisSignature = imageSignature;
+    NSString *thisSignature = jpgImageSignature;
     NSString *mimeType = @"image/jpg";
     
-    if ([thisURL containsString:audioSignature]) {
+    if ([thisURL containsString:pngImageSignature]) {
+        thisSignature = pngImageSignature;
+        mimeType = @"image/png";
+    } else if ([thisURL containsString:audioSignature]) {
         thisSignature = audioSignature;
         mimeType = @"audio/mp4";
-    
     } else if ([thisURL containsString:videoSignature]) {
         thisSignature = videoSignature;
         mimeType = @"video/mp4";
@@ -83,11 +87,6 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
     if (fileExists) {
-        // legacy test code
-        
-        // UIImage *image;
-        // image = [[UIImage alloc] initWithContentsOfFile:thisURL];
-        // NSData *data = UIImageJPEGRepresentation(image, 1.0);
             
         // Read file
         NSData *data = [NSData dataWithContentsOfFile:thisURL];
