@@ -24,8 +24,8 @@
 Cordova Alpha WKWebView Engine
 ======
 
-This is a modified version of the Cordova WkWebView Engine plugin that includes a custom URL scheme, alpha-local:// for access to jpg and media files
-stored in the device local file system. Assumes a file name that starts with the file:// protocol. 
+This is a modified version of the Cordova WkWebView Engine plugin that includes a custom URL scheme, alpha-local:// for access to local media and html files
+stored in the device local file system. Assumes the original file name starts with the file:// protocol. 
 
 To access jpg image files add the prefix:   alpha-local://jpg-image?url= to the local jpg file name.
 To access png image files add the prefix:   alpha-local://png-image?url= to the local png file name.
@@ -33,8 +33,9 @@ To access png image files add the prefix:   alpha-local://png-image?url= to the 
 To access audio files add the prefix:   alpha-local://audio?url= to the local audio file name.
 To access video files, add the prefix:  alpha-local://video?url= to the local video file name.
 
+To access html files, add the prefix:  alpha-local://html?url= to the local html file name.
 
-This plugin makes `Cordova` use the `WKWebView` component instead of the default `UIWebView` component, and is installable only on a system with the iOS 9.0 SDK.
+This plugin makes `Cordova` use the `WKWebView` component instead of the default `UIWebView` component, and is installable only on a system with the iOS 9.0 > SDK.
 
 In iOS 9, Apple has fixed the [issue](http://www.openradar.me/18039024) present through iOS 8 where you cannot load locale files using file://, and must resort to using a local webserver. **However, you are still not able to use XHR from the file:// protocol without [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) enabled on your server.**
 

@@ -19,9 +19,9 @@
 
 /* Modified for use with Alpha Anywhere
     By: R.E. Moore Jr.
-    Date Last Revised: 08-09-2018
+    Date Last Revised: 03-18-2019
 
-    Includes custom URL scheme handler for images
+    Includes custom URL scheme handler for access to local device files
  */
 
 #import "CDVWKWebViewEngine.h"
@@ -42,7 +42,7 @@
 
 @end
 
-#pragma mark - Custom Scheme Handler Class
+#pragma mark - Custom URL Scheme Handler Class
 @interface CustomUrlSchemeHandler : NSObject <WKURLSchemeHandler>
 
 @property (nonatomic, strong) id <WKURLSchemeTask> task;
@@ -65,8 +65,9 @@
     NSString *pngImageSignature = @"alpha-local://png-image?url=file://";
     NSString *audioSignature =    @"alpha-local://audio?url=file://";
     NSString *videoSignature =    @"alpha-local://video?url=file://";
+    NSString *htmlSignature =     @"alpha-local://html?url=file://";
     
-    //set defaults to handle images
+    //set defaults to handle jpg image
     NSString *thisSignature = jpgImageSignature;
     NSString *mimeType = @"image/jpg";
     
@@ -79,6 +80,9 @@
     } else if ([thisURL containsString:videoSignature]) {
         thisSignature = videoSignature;
         mimeType = @"video/mp4";
+    } else if ([thisURL containsString:htmlSignature]) {
+        thisSignature = htmlSignature;
+        mimeType = @"text/html";
     }
     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
