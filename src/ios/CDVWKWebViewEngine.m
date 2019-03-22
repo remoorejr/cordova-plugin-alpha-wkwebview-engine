@@ -17,12 +17,13 @@
  under the License.
  */
 
-/* Modified for use with Alpha Anywhere
-    By: R.E. Moore Jr.
-    Date Last Revised: 03-18-2019
-
+ /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
+    By: @remoorejr
+    Date Last Revised: 03-22-2019
+ 
     Includes custom URL scheme handler for access to local device files
  */
+
 
 #import "CDVWKWebViewEngine.h"
 #import "CDVWKWebViewUIDelegate.h"
@@ -46,6 +47,7 @@
 @interface CustomUrlSchemeHandler : NSObject <WKURLSchemeHandler>
 
 @property (nonatomic, strong) id <WKURLSchemeTask> task;
+@property (nonatomic, strong) NSString *localFilePath;
 
 - (void) webView:(WKWebView *)webView startURLSchemeTask: (id <WKURLSchemeTask>)urlSchemeTask;
 - (void) webView:(WKWebView *)webview stopURLSchemeTask : (id <WKURLSchemeTask>)urlSchemeTask;
@@ -57,10 +59,11 @@
 - (void) webView: (WKWebView *) webView startURLSchemeTask:(nonnull id <WKURLSchemeTask>) urlSchemeTask {
     NSLog(@"Start called for custom URL scheme handler for alpha-local://");
     NSURL *url = urlSchemeTask.request.URL;
+    
     NSString *thisURL = url.absoluteString;
+    
     _task = urlSchemeTask;
     
-   
     NSString *jpgImageSignature = @"alpha-local://jpg-image?url=file://";
     NSString *pngImageSignature = @"alpha-local://png-image?url=file://";
     NSString *audioSignature =    @"alpha-local://audio?url=file://";
@@ -83,11 +86,44 @@
     } else if ([thisURL containsString:htmlSignature]) {
         thisSignature = htmlSignature;
         mimeType = @"text/html";
+       
+        /*
+           This is not a generic html page handler.
+           The code is designed specifically to support the Alpha Anywhere Instant Update feature which loads
+           and launches an index.html file to/from the devices local file system.
+        */
+        
+        if ([thisURL containsString:@"file://"]) {
+            // get local file path
+            _localFilePath = [thisURL stringByReplacingOccurrencesOfString:@"index.html" withString:@""];
+            _localFilePath = [_localFilePath stringByReplacingOccurrencesOfString:thisSignature withString:@""];
+        }
     }
     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
+    
+    if ([thisURL containsString:@"alpha-local://html"]) {
+        thisURL = [thisURL stringByReplacingOccurrencesOfString:@"alpha-local://html" withString:_localFilePath];
+    }
+    
+    /*
+       A random query string may have been added to some css files to force a non-cached read.
+       File read will fail if the query string is included.
+       Strip query string if present.
+    */
+    
+    NSURL *revisedURL = [NSURL URLWithString:thisURL];
+    NSString *urlQuery = revisedURL.query;
+
+    if (urlQuery != nil) {
+        thisURL = [revisedURL.absoluteString stringByReplacingOccurrencesOfString:revisedURL.query withString:@""];
+        thisURL = [thisURL stringByReplacingOccurrencesOfString:@"?" withString:@""];
+    }
+    
     NSLog(@"Local file url -> %@",thisURL);
-    NSURL *modifiedURL = [NSURL fileURLWithPath:thisURL];
+    
+    NSURL *modifiedURL = [NSURL URLWithString:thisURL];
+    
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
     if (fileExists) {
@@ -110,6 +146,7 @@
 }
 
 @end
+
 
 @interface CDVWKWebViewEngine ()
 
