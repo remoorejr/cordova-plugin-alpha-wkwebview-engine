@@ -19,7 +19,7 @@
 
  /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
     By: @remoorejr
-    Date Last Revised: 03-22-2019
+    Date Last Revised: 03-26-2019
  
     Includes custom URL scheme handler for access to local device files
  */
@@ -86,22 +86,18 @@
     } else if ([thisURL containsString:htmlSignature]) {
         thisSignature = htmlSignature;
         mimeType = @"text/html";
-       
-        /*
-           This is not a generic html page handler.
-           The code is designed specifically to support the Alpha Anywhere Instant Update feature which loads
-           and launches an index.html file to/from the devices local file system.
-        */
         
         if ([thisURL containsString:@"file://"]) {
-            // get local file path
-            _localFilePath = [thisURL stringByReplacingOccurrencesOfString:@"index.html" withString:@""];
+            // determine/set local file path, strip filename and ext.
+            NSString *requestedFileName = [thisURL lastPathComponent];
+            _localFilePath = [thisURL stringByReplacingOccurrencesOfString:requestedFileName withString:@""];
             _localFilePath = [_localFilePath stringByReplacingOccurrencesOfString:thisSignature withString:@""];
         }
     }
     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
     
+    // handle all css, JavaScript files, etc. requested by root html document
     if ([thisURL containsString:@"alpha-local://html"]) {
         thisURL = [thisURL stringByReplacingOccurrencesOfString:@"alpha-local://html" withString:_localFilePath];
     }

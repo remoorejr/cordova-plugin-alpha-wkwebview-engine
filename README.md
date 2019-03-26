@@ -25,12 +25,14 @@ Cordova Alpha WKWebView Engine
 ======
 
 This is a modified version of the Cordova WkWebView Engine plugin that includes a custom URL scheme, alpha-local:// for access to local media and html files
-stored in the device local file system. Assumes the original file name starts with the file:// protocol. 
+stored in the device local file system. Assumes the requested file name uses the file:// protocol. 
 
 To access jpg image files add the prefix:   alpha-local://jpg-image?url= to the local jpg file name.
+
 To access png image files add the prefix:   alpha-local://png-image?url= to the local png file name.
 
 To access audio files add the prefix:   alpha-local://audio?url= to the local audio file name.
+
 To access video files, add the prefix:  alpha-local://video?url= to the local video file name.
 
 To access html files, add the prefix:  alpha-local://html?url= to the local html file name.
