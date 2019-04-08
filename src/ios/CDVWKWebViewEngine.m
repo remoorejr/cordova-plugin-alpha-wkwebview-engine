@@ -69,31 +69,54 @@
     NSString *audioSignature =    @"alpha-local://audio?url=file://";
     NSString *videoSignature =    @"alpha-local://video?url=file://";
     NSString *htmlSignature =     @"alpha-local://html?url=file://";
-    
+    NSString *pdfSignature =      @"alpha-local://pdf?url=file://";
+    NSString *docSignature =      @"alpha-local://doc?url=file://";
+    NSString *xlsSignature =      @"alpha-local://xls?url=file://";
+    NSString *pptSignature =      @"alpha-local://ppt?url=file://";
+
     //set defaults to handle jpg image
     NSString *thisSignature = jpgImageSignature;
     NSString *mimeType = @"image/jpg";
     
-    if ([thisURL containsString:pngImageSignature]) {
-        thisSignature = pngImageSignature;
-        mimeType = @"image/png";
-    } else if ([thisURL containsString:audioSignature]) {
-        thisSignature = audioSignature;
-        mimeType = @"audio/mp4";
-    } else if ([thisURL containsString:videoSignature]) {
-        thisSignature = videoSignature;
-        mimeType = @"video/mp4";
-    } else if ([thisURL containsString:htmlSignature]) {
+    if ([thisURL containsString:htmlSignature]) {
         thisSignature = htmlSignature;
         mimeType = @"text/html";
-        
         if ([thisURL containsString:@"file://"]) {
             // determine/set local file path, strip filename and ext.
             NSString *requestedFileName = [thisURL lastPathComponent];
             _localFilePath = [thisURL stringByReplacingOccurrencesOfString:requestedFileName withString:@""];
             _localFilePath = [_localFilePath stringByReplacingOccurrencesOfString:thisSignature withString:@""];
         }
-    }
+
+    } else if  ([thisURL containsString:pngImageSignature]) {
+        thisSignature = pngImageSignature;
+        mimeType = @"image/png";
+
+    } else if ([thisURL containsString:audioSignature]) {
+        thisSignature = audioSignature;
+        mimeType = @"audio/mp4";
+
+    } else if ([thisURL containsString:videoSignature]) {
+        thisSignature = videoSignature;
+        mimeType = @"video/mp4";
+
+    } else if ([thisURL containsString:pdfSignature]) {
+        thisSignature = pdfSignature;
+        mimeType = @"application/pdf";
+
+    } else if ([thisURL containsString:docSignature]) {
+        thisSignature = docSignature;
+        mimeType = @"application/msword";
+
+    } else if ([thisURL containsString:xlsSignature]) {
+        thisSignature = xlsSignature;
+        mimeType = @"application/vnd.ms-excel";
+
+    } else if ([thisURL containsString:pptSignature]) {
+        thisSignature = pptSignature;
+        mimeType = @"application/vnd.ms-powerpoint";
+
+    } 
     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
     

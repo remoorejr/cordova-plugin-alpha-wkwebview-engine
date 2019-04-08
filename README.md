@@ -24,7 +24,7 @@
 Cordova Alpha WKWebView Engine
 ======
 
-This is a modified version of the Cordova WkWebView Engine plugin that includes a custom URL scheme, alpha-local:// for access to local media and html files
+This is a modified version of the Cordova WkWebView Engine plugin that includes a custom URL scheme, alpha-local:// for access to local asset files
 stored in the device local file system. Assumes the requested file name uses the file:// protocol. 
 
 To access jpg image files add the prefix:   alpha-local://jpg-image?url= to the local jpg file name.
@@ -36,6 +36,14 @@ To access audio files add the prefix:   alpha-local://audio?url= to the local au
 To access video files, add the prefix:  alpha-local://video?url= to the local video file name.
 
 To access html files, add the prefix:  alpha-local://html?url= to the local html file name.
+
+To access pdf files, add the prefix:  alpha-local://pdf?url= to the local pdf file name.
+
+To access doc files, add the prefix:  alpha-local://doc?url= to the local doc file name.
+
+To access xls files, add the prefix:  alpha-local://xls?url= to the local xls file name.
+
+To access ppt files, add the prefix:  alpha-local://ppt?url= to the local ppt file name.
 
 This plugin makes `Cordova` use the `WKWebView` component instead of the default `UIWebView` component, and is installable only on a system with the iOS 9.0 > SDK.
 
