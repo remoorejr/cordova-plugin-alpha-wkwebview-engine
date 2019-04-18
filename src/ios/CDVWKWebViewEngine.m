@@ -31,6 +31,7 @@
 #import <Cordova/NSDictionary+CordovaPreferences.h>
 
 #import <objc/message.h>
+#import <Quicklook/Quicklook.h>
 
 #define CDV_BRIDGE_NAME @"cordova"
 #define CDV_WKWEBVIEW_FILE_URL_LOAD_SELECTOR @"loadFileURL:allowingReadAccessToURL:"
@@ -40,6 +41,57 @@
 @property (nonatomic, weak, readonly) id<WKScriptMessageHandler>scriptMessageHandler;
 
 - (instancetype)initWithScriptMessageHandler:(id<WKScriptMessageHandler>)scriptMessageHandler;
+
+@end
+
+/*
+ *  Quicklook Document Handler
+ *  Handles a single file in this release
+*/
+
+@interface DocumentHandler : NSObject <QLPreviewControllerDataSource>
+
+@property(readonly, nullable, nonatomic) NSURL      * previewItemURL;
+@property(readonly, nullable, nonatomic) NSString   * previewItemTitle;
+
+-(instancetype) initWithPreviewURL:(NSURL *)docURL WithTitle:(NSString *)title;
+
+@end
+
+@implementation DocumentHandler
+
+- (instancetype)initWithPreviewURL:(NSURL *)docURL WithTitle:(NSString *)title {
+    
+    _previewItemURL = [docURL copy];
+    _previewItemTitle = [title copy];
+    
+    /*
+     *  create the Quicklook controller.
+     */
+    
+    QLPreviewController *previewController = [[QLPreviewController alloc] init];
+    previewController.dataSource = self;
+    previewController.currentPreviewItemIndex = 1;
+    // [[previewController navigationItem] setRightBarButtonItem:nil animated:NO];
+    
+    UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+    [root presentViewController:previewController animated:YES completion:nil];
+    return self;
+}
+
+#pragma mark - QLPreviewControllerDataSource Methods
+- (NSInteger)numberOfPreviewItemsInPreviewController:(QLPreviewController *)controller
+{
+    return 1;
+}
+
+- (id)previewController:(QLPreviewController *)controller previewItemAtIndex:(NSInteger)index
+{
+    NSURL *fileURL = nil;
+    fileURL = _previewItemURL;
+    return fileURL;
+}
+
 
 @end
 
@@ -64,8 +116,8 @@
     
     _task = urlSchemeTask;
     
-    NSString *jpgImageSignature = @"alpha-local://jpg-image?url=file://";
-    NSString *pngImageSignature = @"alpha-local://png-image?url=file://";
+    NSString *jpgImageSignature = @"alpha-local://jpg?url=file://";
+    NSString *pngImageSignature = @"alpha-local://png?url=file://";
     NSString *audioSignature =    @"alpha-local://audio?url=file://";
     NSString *videoSignature =    @"alpha-local://video?url=file://";
     NSString *htmlSignature =     @"alpha-local://html?url=file://";
@@ -73,14 +125,19 @@
     NSString *docSignature =      @"alpha-local://doc?url=file://";
     NSString *xlsSignature =      @"alpha-local://xls?url=file://";
     NSString *pptSignature =      @"alpha-local://ppt?url=file://";
+    NSString *zipSignature =      @"alpha-local://zip?url=file://";
 
     //set defaults to handle jpg image
     NSString *thisSignature = jpgImageSignature;
     NSString *mimeType = @"image/jpg";
     
+    BOOL showDocViewer;
+    
     if ([thisURL containsString:htmlSignature]) {
         thisSignature = htmlSignature;
         mimeType = @"text/html";
+        showDocViewer = FALSE;
+        
         if ([thisURL containsString:@"file://"]) {
             // determine/set local file path, strip filename and ext.
             NSString *requestedFileName = [thisURL lastPathComponent];
@@ -91,71 +148,96 @@
     } else if  ([thisURL containsString:pngImageSignature]) {
         thisSignature = pngImageSignature;
         mimeType = @"image/png";
+        showDocViewer = FALSE;
 
     } else if ([thisURL containsString:audioSignature]) {
         thisSignature = audioSignature;
         mimeType = @"audio/mp4";
+        showDocViewer = FALSE;
 
     } else if ([thisURL containsString:videoSignature]) {
         thisSignature = videoSignature;
         mimeType = @"video/mp4";
+        showDocViewer = FALSE;
 
     } else if ([thisURL containsString:pdfSignature]) {
         thisSignature = pdfSignature;
-        mimeType = @"application/pdf";
-
+        showDocViewer = TRUE;
+        
     } else if ([thisURL containsString:docSignature]) {
         thisSignature = docSignature;
-        mimeType = @"application/msword";
+        showDocViewer = TRUE;
 
     } else if ([thisURL containsString:xlsSignature]) {
         thisSignature = xlsSignature;
-        mimeType = @"application/vnd.ms-excel";
+        showDocViewer = TRUE;
 
     } else if ([thisURL containsString:pptSignature]) {
         thisSignature = pptSignature;
-        mimeType = @"application/vnd.ms-powerpoint";
+        showDocViewer = TRUE;
 
-    } 
+    } else if ([thisURL containsString:zipSignature]) {
+        thisSignature = zipSignature;
+        showDocViewer = TRUE;
+        
+    }
     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
     
-    // handle all css, JavaScript files, etc. requested by root html document
-    if ([thisURL containsString:@"alpha-local://html"]) {
-        thisURL = [thisURL stringByReplacingOccurrencesOfString:@"alpha-local://html" withString:_localFilePath];
-    }
-    
-    /*
-       A random query string may have been added to some css files to force a non-cached read.
-       File read will fail if the query string is included.
-       Strip query string if present.
-    */
-    
-    NSURL *revisedURL = [NSURL URLWithString:thisURL];
-    NSString *urlQuery = revisedURL.query;
+    if (showDocViewer) {
+        NSLog(@"Local file url -> %@",thisURL);
+        NSURL *modifiedURL = [NSURL URLWithString:thisURL];
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
+        if (fileExists) {
+            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL WithTitle:"File Viewer"];
+            // complete but don't send nothing back
+            // the file was displayed by the Doc Viewer
+            NSData *data;
+            NSURLResponse *response = [[NSURLResponse alloc] init];
+            [_task didReceiveResponse: response];
+            [_task didReceiveData: data];
+            [_task didFinish];
+        }
+    } else {
+        // handle all css, JavaScript files, etc. requested by root html document
+        if ([thisURL containsString:@"alpha-local://html"]) {
+            thisURL = [thisURL stringByReplacingOccurrencesOfString:@"alpha-local://html" withString:_localFilePath];
+        }
+        
+        /*
+           A random query string may have been added to some css files to force a non-cached read.
+           File read will fail if the query string is included.
+           Strip query string if present.
+        */
+        
+        NSURL *revisedURL = [NSURL URLWithString:thisURL];
+        NSString *urlQuery = revisedURL.query;
 
-    if (urlQuery != nil) {
-        thisURL = [revisedURL.absoluteString stringByReplacingOccurrencesOfString:revisedURL.query withString:@""];
-        thisURL = [thisURL stringByReplacingOccurrencesOfString:@"?" withString:@""];
-    }
-    
-    NSLog(@"Local file url -> %@",thisURL);
-    
-    NSURL *modifiedURL = [NSURL URLWithString:thisURL];
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
-    if (fileExists) {
+        if (urlQuery != nil) {
+            thisURL = [revisedURL.absoluteString stringByReplacingOccurrencesOfString:revisedURL.query withString:@""];
+            thisURL = [thisURL stringByReplacingOccurrencesOfString:@"?" withString:@""];
+        }
+        
+        NSLog(@"Local file url -> %@",thisURL);
+        
+        NSURL *modifiedURL = [NSURL URLWithString:thisURL];
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
+        if (fileExists) {
             
-        // Read file
-        NSData *data = [NSData dataWithContentsOfFile:thisURL];
-        NSUInteger count = data.length;
-    
-        // Send data back
-        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:modifiedURL MIMEType:mimeType expectedContentLength:count textEncodingName:@""];
-        [_task didReceiveResponse: response];
-        [_task didReceiveData: data];
-        [_task didFinish];
+            // Read file
+            NSData *data = [NSData dataWithContentsOfFile:thisURL];
+            NSUInteger count = data.length;
+        
+            // Send data back
+            NSURLResponse *response = [[NSURLResponse alloc] initWithURL:modifiedURL MIMEType:mimeType expectedContentLength:count textEncodingName:@""];
+            [_task didReceiveResponse: response];
+            [_task didReceiveData: data];
+            [_task didFinish];
+        }
     }
 }
 
