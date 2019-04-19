@@ -29,9 +29,9 @@
 #import "CDVWKWebViewUIDelegate.h"
 #import "CDVWKProcessPoolFactory.h"
 #import <Cordova/NSDictionary+CordovaPreferences.h>
+#import <Quicklook/Quicklook.h>
 
 #import <objc/message.h>
-#import <Quicklook/Quicklook.h>
 
 #define CDV_BRIDGE_NAME @"cordova"
 #define CDV_WKWEBVIEW_FILE_URL_LOAD_SELECTOR @"loadFileURL:allowingReadAccessToURL:"
@@ -191,11 +191,16 @@
         NSFileManager *fileManager = [NSFileManager defaultManager];
         BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
         if (fileExists) {
-            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL WithTitle:"File Viewer"];
+            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:thisURL WithTitle:@"File Viewer"];
             // complete but don't send nothing back
             // the file was displayed by the Doc Viewer
             NSData *data;
-            NSURLResponse *response = [[NSURLResponse alloc] init];
+
+            NSURLResponse *response; 
+            [response setValue: modifiedURL forKey:@"url"];
+            [response setValue:@"image/jpeg" forKey:@"mimeType"];
+            [response setValue:@"-1" forKey:@"expectedContentLength"];
+            [response setValue:nil forKey:@"textEncodingName"];
             [_task didReceiveResponse: response];
             [_task didReceiveData: data];
             [_task didFinish];
@@ -234,6 +239,7 @@
         
             // Send data back
             NSURLResponse *response = [[NSURLResponse alloc] initWithURL:modifiedURL MIMEType:mimeType expectedContentLength:count textEncodingName:@""];
+
             [_task didReceiveResponse: response];
             [_task didReceiveData: data];
             [_task didFinish];
