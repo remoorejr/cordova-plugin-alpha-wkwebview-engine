@@ -29,9 +29,9 @@
 #import "CDVWKWebViewUIDelegate.h"
 #import "CDVWKProcessPoolFactory.h"
 #import <Cordova/NSDictionary+CordovaPreferences.h>
-#import <Quicklook/Quicklook.h>
 
 #import <objc/message.h>
+#import <Quicklook/Quicklook.h>
 
 #define CDV_BRIDGE_NAME @"cordova"
 #define CDV_WKWEBVIEW_FILE_URL_LOAD_SELECTOR @"loadFileURL:allowingReadAccessToURL:"
@@ -194,7 +194,9 @@
             DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL WithTitle:@"File"];
             // complete but don't send anything back
             // the file was displayed by the Doc Viewer
-            NSData *data = nil;
+            
+            NSString *str =@"";
+            NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
 
             NSURLResponse *response; 
             [response setValue: docURL forKey:@"url"];
