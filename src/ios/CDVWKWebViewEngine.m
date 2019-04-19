@@ -72,7 +72,6 @@
     QLPreviewController *previewController = [[QLPreviewController alloc] init];
     previewController.dataSource = self;
     previewController.currentPreviewItemIndex = 1;
-    // [[previewController navigationItem] setRightBarButtonItem:nil animated:NO];
     
     UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
     [root presentViewController:previewController animated:YES completion:nil];
@@ -186,18 +185,19 @@
     
     if (showDocViewer) {
         NSLog(@"Local file url -> %@",thisURL);
-        NSURL *modifiedURL = [NSURL URLWithString:thisURL];
+        NSURL *docURL = [NSURL URLWithString:thisURL];
         
         NSFileManager *fileManager = [NSFileManager defaultManager];
         BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
+        
         if (fileExists) {
-            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:thisURL WithTitle:@"File Viewer"];
-            // complete but don't send nothing back
+            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL WithTitle:@"File"];
+            // complete but don't send anything back
             // the file was displayed by the Doc Viewer
-            NSData *data;
+            NSData *data = nil;
 
             NSURLResponse *response; 
-            [response setValue: modifiedURL forKey:@"url"];
+            [response setValue: docURL forKey:@"url"];
             [response setValue:@"image/jpeg" forKey:@"mimeType"];
             [response setValue:@"-1" forKey:@"expectedContentLength"];
             [response setValue:nil forKey:@"textEncodingName"];
