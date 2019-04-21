@@ -185,7 +185,9 @@
     
     if (showDocViewer) {
         NSLog(@"Local file url -> %@",thisURL);
-        NSURL *docURL = [NSURL URLWithString:thisURL];
+        
+        //NSURL *docURL = [NSURL URLWithString:thisURL];
+        NSURL *docURL=  [NSURL fileURLWithPath:thisURL];
         
         NSFileManager *fileManager = [NSFileManager defaultManager];
         BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
