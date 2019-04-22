@@ -26,25 +26,19 @@ stored in the device local file system. Assumes the requested file name uses the
 
 This plugin can also display the contents of a file in a native modal file viewer that supports pdf, doc, xls, ppt and zip files.
 
-To access jpg image files add the prefix:   alpha-local://jpg?url= to the local jpg file name.
+To access local jpg image files add the prefix:   alpha-local://jpg?url= to the local jpg file name.
 
-To access png image files add the prefix:   alpha-local://png?url= to the local png file name.
+To access local png image files add the prefix:   alpha-local://png?url= to the local png file name.
 
-To access audio files add the prefix:   alpha-local://audio?url= to the local audio file name.
+To access local audio files add the prefix:   alpha-local://audio?url= to the local audio file name.
 
-To access video files, add the prefix:  alpha-local://video?url= to the local video file name.
+To access local video files, add the prefix:  alpha-local://video?url= to the local video file name.
 
-To access html files, add the prefix:  alpha-local://html?url= to the local html file name.
+To access local html files, add the prefix:  alpha-local://html?url= to the local html file name.
 
-To display a pdf file, add the prefix:  alpha-local://pdf?url= to the local pdf file name.
+To display an image, pdf, xlsx, doc, ppt, text, csv, RTF, Pages, Keynote, Numbers, zip, audio or video local file in a native iOS viewer (that supports pinch zoom and sharing options), add the prefix:  alpha-local://view?url= to the local pdf file name.
 
-To display a doc file, add the prefix:  alpha-local://doc?url= to the local doc file name.
 
-To display a xls file, add the prefix:  alpha-local://xls?url= to the local xls file name.
-
-To display a ppt file, add the prefix:  alpha-local://ppt?url= to the local ppt file name.
-
-To display the contents of a zip file, add the prefix:  alpha-local://zip?url= to the local ppt file name.
 
 This plugin makes `Cordova` use the `WKWebView` component instead of the default `UIWebView` component, and is installable only on a system with the iOS 9.0 > SDK.
 

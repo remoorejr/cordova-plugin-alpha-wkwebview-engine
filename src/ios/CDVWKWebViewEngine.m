@@ -19,9 +19,10 @@
 
  /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
     By: @remoorejr
-    Date Last Revised: 03-26-2019
+    Date Last Revised: 04-22-2019
  
     Includes custom URL scheme handler for access to local device files
+    Includes QuickLook for viewing local files
  */
 
 
@@ -45,28 +46,26 @@
 @end
 
 /*
- *  Quicklook Document Handler
+ *  QuickLook Document Viewer
  *  Handles a single file in this release
 */
 
 @interface DocumentHandler : NSObject <QLPreviewControllerDataSource>
 
 @property(readonly, nullable, nonatomic) NSURL      * previewItemURL;
-@property(readonly, nullable, nonatomic) NSString   * previewItemTitle;
 
--(instancetype) initWithPreviewURL:(NSURL *)docURL WithTitle:(NSString *)title;
+-(instancetype) initWithPreviewURL:(NSURL *)docURL;
 
 @end
 
 @implementation DocumentHandler
 
-- (instancetype)initWithPreviewURL:(NSURL *)docURL WithTitle:(NSString *)title {
+- (instancetype)initWithPreviewURL:(NSURL *)docURL {
     
     _previewItemURL = [docURL copy];
-    _previewItemTitle = [title copy];
     
     /*
-     *  create the Quicklook controller.
+     *  create the QuickLook controller.
      */
     
     QLPreviewController *previewController = [[QLPreviewController alloc] init];
@@ -120,11 +119,7 @@
     NSString *audioSignature =    @"alpha-local://audio?url=file://";
     NSString *videoSignature =    @"alpha-local://video?url=file://";
     NSString *htmlSignature =     @"alpha-local://html?url=file://";
-    NSString *pdfSignature =      @"alpha-local://pdf?url=file://";
-    NSString *docSignature =      @"alpha-local://doc?url=file://";
-    NSString *xlsSignature =      @"alpha-local://xls?url=file://";
-    NSString *pptSignature =      @"alpha-local://ppt?url=file://";
-    NSString *zipSignature =      @"alpha-local://zip?url=file://";
+    NSString *viewSignature =     @"alpha-local://view?url=file://";
 
     //set defaults to handle jpg image
     NSString *thisSignature = jpgImageSignature;
@@ -159,24 +154,9 @@
         mimeType = @"video/mp4";
         showDocViewer = FALSE;
 
-    } else if ([thisURL containsString:pdfSignature]) {
-        thisSignature = pdfSignature;
-        showDocViewer = TRUE;
-        
-    } else if ([thisURL containsString:docSignature]) {
-        thisSignature = docSignature;
-        showDocViewer = TRUE;
-
-    } else if ([thisURL containsString:xlsSignature]) {
-        thisSignature = xlsSignature;
-        showDocViewer = TRUE;
-
-    } else if ([thisURL containsString:pptSignature]) {
-        thisSignature = pptSignature;
-        showDocViewer = TRUE;
-
-    } else if ([thisURL containsString:zipSignature]) {
-        thisSignature = zipSignature;
+    } else if ([thisURL containsString:viewSignature]) {
+        thisSignature = viewSignature;
+         mimeType = @"application/octet-stream";
         showDocViewer = TRUE;
         
     }
@@ -185,24 +165,22 @@
     
     if (showDocViewer) {
         NSLog(@"Local file url -> %@",thisURL);
-        
-        //NSURL *docURL = [NSURL URLWithString:thisURL];
         NSURL *docURL=  [NSURL fileURLWithPath:thisURL];
         
         NSFileManager *fileManager = [NSFileManager defaultManager];
         BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
         
         if (fileExists) {
-            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL WithTitle:@"File"];
+            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL];
             // complete but don't send anything back
-            // the file was displayed by the Doc Viewer
+            // the file was displayed by QuickLook
             
             NSString *str =@"";
             NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
 
             NSURLResponse *response; 
             [response setValue: docURL forKey:@"url"];
-            [response setValue:@"image/jpeg" forKey:@"mimeType"];
+            [response setValue: mimeType forKey:@"mimeType"];
             [response setValue:@"-1" forKey:@"expectedContentLength"];
             [response setValue:nil forKey:@"textEncodingName"];
             [_task didReceiveResponse: response];
