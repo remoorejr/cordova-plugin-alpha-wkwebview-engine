@@ -24,7 +24,11 @@ var exec = require('cordova/exec');
 var WkWebKit = {
     allowsBackForwardNavigationGestures: function (allow) {
         exec(null, null, 'CDVWKWebViewEngine', 'allowsBackForwardNavigationGestures', [allow]);
+    },
+    isAlphaWkWebView: function () {
+    	return true;
     }
+
 };
 
 module.exports = WkWebKit;
