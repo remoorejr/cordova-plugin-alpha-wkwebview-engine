@@ -23,12 +23,12 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="https://remoorejr:42a62(EUaBUfbv@github.com/remoorejr/cordova-plugin-alpha-wkwebview-engine.git"
+    id="cordova-plugin-alpha-wkwebview-engine"
     version="1.1.11">
     <name>Cordova Alpha Modified WKWebView Engine</name>
     <description>Cordova Alpha Modified WKWebView Engine Plugin</description>
     <license>Apache 2.0</license>
-    <keywords>cordova,wkwebview,webview</keywords>
+    <keywords>cordova,wkwebview</keywords>
     <repo>https://github.com/remoorejr/cordova-plugin-alpha-wkwebview-engine.git</repo>
 
 	<engines>
