@@ -125,7 +125,7 @@
     NSString *thisSignature = jpgImageSignature;
     NSString *mimeType = @"image/jpg";
     
-    BOOL showDocViewer;
+    BOOL showDocViewer = FALSE;
     
     if ([thisURL containsString:htmlSignature]) {
         thisSignature = htmlSignature;
@@ -225,6 +225,10 @@
             [_task didReceiveResponse: response];
             [_task didReceiveData: data];
             [_task didFinish];
+        } else {
+             NSLog(@"** File not found -> %@",thisURL);
+            NSError *error = [NSError errorWithDomain: NSCocoaErrorDomain code:4 userInfo:nil];
+            [_task didFailWithError:error];
         }
     }
 }
