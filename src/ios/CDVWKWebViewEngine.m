@@ -307,6 +307,9 @@
 
     WKWebViewConfiguration* configuration = [self createConfigurationFromSettings:settings];
     configuration.userContentController = userContentController;
+
+    //  set configuartion for persistent data store
+    configuration.websiteDataStore = WKWebsiteDataStore.defaultDataStore;
     
     // set configuation for custom URL scheme handler alpha-local
     [configuration setURLSchemeHandler:myCustomUrlSchemeHandler forURLScheme:@"alpha-local"];
