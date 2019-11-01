@@ -19,6 +19,7 @@
 
 #import <WebKit/WebKit.h>
 #import <Cordova/CDV.h>
+#import "QLPreviewItemCustom.h"
 
 @interface CDVWKWebViewEngine : CDVPlugin <CDVWebViewEngineProtocol, WKScriptMessageHandler, WKNavigationDelegate>
 

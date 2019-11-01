@@ -23,7 +23,7 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="cordova-plugin-alpha-wkwebview-engine"
-    version="1.1.11">
+    version="1.2.0">
     <name>Cordova Alpha Modified WKWebView Engine</name>
     <description>Cordova Alpha Modified WKWebView Engine Plugin</description>
     <license>Apache 2.0</license>
@@ -60,5 +60,8 @@
         <source-file src="src/ios/CDVWKWebViewUIDelegate.m" />
         <header-file src="src/ios/CDVWKProcessPoolFactory.h" />
         <source-file src="src/ios/CDVWKProcessPoolFactory.m" />
+        <header-file src="src/ios/QLPreviewItemCustom.h" />
+        <source-file src="src/ios/QLPreviewItemCustom.m" />
+
     </platform>
 </plugin>
