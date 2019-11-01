@@ -19,7 +19,7 @@
 
  /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
     By: @remoorejr
-    Date Last Revised: 04-22-2019
+    Date Last Revised: 11-01-2019
  
     Includes custom URL scheme handler for access to local device files
     Includes QuickLook for viewing local files
@@ -33,6 +33,7 @@
 
 #import <objc/message.h>
 #import <Quicklook/Quicklook.h>
+#import "QLPreviewItemCustom.h"
 
 #define CDV_BRIDGE_NAME @"cordova"
 #define CDV_WKWEBVIEW_FILE_URL_LOAD_SELECTOR @"loadFileURL:allowingReadAccessToURL:"
@@ -45,59 +46,17 @@
 
 @end
 
-/*
- *  QuickLook Document Viewer
- *  Handles a single file in this release
-*/
-
-@interface DocumentHandler : NSObject <QLPreviewControllerDataSource>
-
-@property(readonly, nullable, nonatomic) NSURL      * previewItemURL;
-
--(instancetype) initWithPreviewURL:(NSURL *)docURL;
-
-@end
-
-@implementation DocumentHandler
-
-- (instancetype)initWithPreviewURL:(NSURL *)docURL {
-    
-    _previewItemURL = [docURL copy];
-    
-    /*
-     *  create the QuickLook controller.
-     */
-    
-    QLPreviewController *previewController = [[QLPreviewController alloc] init];
-    previewController.dataSource = self;
-    previewController.currentPreviewItemIndex = 1;
-    
-    UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-    [root presentViewController:previewController animated:YES completion:nil];
-    return self;
-}
-
-#pragma mark - QLPreviewControllerDataSource Methods
-- (NSInteger)numberOfPreviewItemsInPreviewController:(QLPreviewController *)controller
-{
-    return 1;
-}
-
-- (id)previewController:(QLPreviewController *)controller previewItemAtIndex:(NSInteger)index
-{
-    NSURL *fileURL = nil;
-    fileURL = _previewItemURL;
-    return fileURL;
-}
-
-
-@end
 
 #pragma mark - Custom URL Scheme Handler Class
-@interface CustomUrlSchemeHandler : NSObject <WKURLSchemeHandler>
+@interface CustomUrlSchemeHandler : NSObject <WKURLSchemeHandler, QLPreviewControllerDataSource, QLPreviewControllerDelegate>
 
 @property (nonatomic, strong) id <WKURLSchemeTask> task;
 @property (nonatomic, strong) NSString *localFilePath;
+@property (nonatomic, strong) NSArray  *fileList;
+@property (nonatomic, strong) NSURL    *previewItemURL;
+@property (nonatomic, assign) NSInteger itemCount;
+@property (nonatomic, assign) BOOL showDir;
+
 
 - (void) webView:(WKWebView *)webView startURLSchemeTask: (id <WKURLSchemeTask>)urlSchemeTask;
 - (void) webView:(WKWebView *)webview stopURLSchemeTask : (id <WKURLSchemeTask>)urlSchemeTask;
@@ -112,6 +71,9 @@
     
     NSString *thisURL = url.absoluteString;
     
+    // init properties
+    _itemCount  = 1;
+    _showDir = FALSE;
     _task = urlSchemeTask;
     
     NSString *jpgImageSignature = @"alpha-local://jpg?url=file://";
@@ -120,6 +82,7 @@
     NSString *videoSignature =    @"alpha-local://video?url=file://";
     NSString *htmlSignature =     @"alpha-local://html?url=file://";
     NSString *viewSignature =     @"alpha-local://view?url=file://";
+    NSString *viewDirSignature =  @"alpha-local://viewdir?url=file://";
 
     //set defaults to handle jpg image
     NSString *thisSignature = jpgImageSignature;
@@ -159,33 +122,107 @@
          mimeType = @"application/octet-stream";
         showDocViewer = TRUE;
         
+    } else if ([thisURL containsString:viewDirSignature]) {
+        thisSignature = viewDirSignature;
+         mimeType = @"application/octet-stream";
+        showDocViewer = TRUE;
     }
+    
     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
     
     if (showDocViewer) {
         NSLog(@"Local file url -> %@",thisURL);
-        NSURL *docURL=  [NSURL fileURLWithPath:thisURL];
         
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
+        if (thisSignature == viewSignature) {
+           
+            _showDir = FALSE;
+            NSURL *docURL=  [NSURL fileURLWithPath:thisURL];
         
-        if (fileExists) {
-            DocumentHandler *thisDH = [[DocumentHandler alloc] initWithPreviewURL:docURL];
-            // complete but don't send anything back
-            // the file was displayed by QuickLook
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            BOOL fileExists = [fileManager fileExistsAtPath: thisURL];
+        
+            if (fileExists) {
+                
+                _itemCount = 1;
+                _previewItemURL = [docURL copy];
             
-            NSString *str =@"";
-            NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
+                QLPreviewController *previewController = [[QLPreviewController alloc] init];
+                previewController.dataSource = self;
+                previewController.delegate = self;
+                previewController.currentPreviewItemIndex = 0;
+                                       
+                UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+                [root presentViewController:previewController animated:YES completion:nil];
+                
+                // complete but don't send anything back
+                // the file was displayed by QuickLook
+            
+                NSString *str =@"";
+                NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
 
-            NSURLResponse *response; 
-            [response setValue: docURL forKey:@"url"];
-            [response setValue: mimeType forKey:@"mimeType"];
-            [response setValue:@"-1" forKey:@"expectedContentLength"];
-            [response setValue:nil forKey:@"textEncodingName"];
-            [_task didReceiveResponse: response];
-            [_task didReceiveData: data];
-            [_task didFinish];
+                NSURLResponse *response;
+                [response setValue: docURL forKey:@"url"];
+                [response setValue: mimeType forKey:@"mimeType"];
+                [response setValue:@"-1" forKey:@"expectedContentLength"];
+                [response setValue:nil forKey:@"textEncodingName"];
+                [_task didReceiveResponse: response];
+                [_task didReceiveData: data];
+                [_task didFinish];
+            }
+        } else {
+            // showdir
+            _showDir = TRUE;
+             NSURL *docURL=  [NSURL fileURLWithPath:thisURL];
+            
+            NSLog(@"This URL->> %@",thisURL);
+            NSLog(@"Doc URL ->> %@",docURL);
+            
+             NSFileManager *fileManager = [NSFileManager defaultManager];
+             NSArray *listOfFiles = [fileManager contentsOfDirectoryAtPath:thisURL error:NULL];
+            _itemCount = [listOfFiles count];
+            
+            // NSArray *directoryPaths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+            
+            NSString *fileName;
+            NSString *filePath = thisURL;
+           
+            NSString *fullFileName;
+            NSMutableArray *filesWithPath = [[NSMutableArray alloc] init];
+            
+            for (int i=0; i<_itemCount; i++) {
+                fileName = [listOfFiles objectAtIndex:i];
+                fullFileName = [NSString stringWithFormat:@"%@%@", filePath,fileName];
+                [filesWithPath addObject:fullFileName];
+                
+                // set global
+                _fileList = [filesWithPath copy];
+            }
+           
+            if (_itemCount > 0) {
+                QLPreviewController *previewController = [[QLPreviewController alloc] init];
+                previewController.dataSource = self;
+                previewController.delegate = self;
+                previewController.currentPreviewItemIndex = 0;
+                        
+                UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+                [root presentViewController:previewController animated:YES completion:nil];
+                     
+                // complete but don't send anything back
+                // the file was displayed by QuickLook
+                           
+                NSString *str =@"";
+                NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
+
+                NSURLResponse *response;
+                [response setValue: docURL forKey:@"url"];
+                [response setValue: mimeType forKey:@"mimeType"];
+                [response setValue:@"-1" forKey:@"expectedContentLength"];
+                [response setValue:nil forKey:@"textEncodingName"];
+                [_task didReceiveResponse: response];
+                [_task didReceiveData: data];
+                [_task didFinish];
+            }
         }
     } else {
         // handle all css, JavaScript files, etc. requested by root html document
@@ -232,6 +269,43 @@
         }
     }
 }
+   
+#pragma mark - QLPreviewControllerDataSource Methods
+- (NSInteger)numberOfPreviewItemsInPreviewController:(QLPreviewController *)previewController
+    {
+        return _itemCount;
+    }
+
+- (id <QLPreviewItem>) previewController:(QLPreviewController *)controller previewItemAtIndex:(NSInteger)index
+    {
+        if (_showDir) {
+            NSLog(@"Index-> %lo filename -> %@",index,[_fileList objectAtIndex:index]);
+            NSURL *thisURL = [NSURL fileURLWithPath:[_fileList objectAtIndex:index]];
+            
+             //below used to add a custom title, experimental 
+            /*
+             
+            NSString *title = [[NSString alloc] initWithFormat: @"file ->%lo",index];
+            QLPreviewItemCustom *customPreviewObj =[[QLPreviewItemCustom alloc] initWithTitle:title url:thisURL];
+            return customPreviewObj;
+             
+            */
+            return thisURL;
+        } else {
+            // show single file
+            NSURL *fileURL = nil;
+            fileURL = _previewItemURL;
+            return fileURL;
+        }
+    }
+
+#pragma mark - QLPreviewControllerDelegate Methods
+- (QLPreviewItemEditingMode)  previewController:(QLPreviewController *)controller editingModeForPreviewItem:(nonnull id<QLPreviewItem>)previewItem {
+    return QLPreviewItemEditingModeUpdateContents;
+}
+
+#pragma mark - QLPreviewItem Methods
+
 
 - (void) webView: (WKWebView *) webView stopURLSchemeTask:(nonnull id <WKURLSchemeTask>)urlSchemeTask {
     NSLog(@"Stop called for custom URL scheme handler for alpha-local://");
@@ -239,6 +313,9 @@
 }
 
 @end
+
+
+
 
 
 @interface CDVWKWebViewEngine ()
