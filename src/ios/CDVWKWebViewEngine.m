@@ -146,7 +146,12 @@
 
     } else if ([thisURL containsString:audioSignature]) {
         thisSignature = audioSignature;
-        mimeType = @"audio/mp4";
+         NSString *ext = [thisURL pathExtension];
+         if ([[ext lowercaseString] isEqualToString:@"mp3"]) {
+            mimeType = @"audio/mpeg";
+        } else {
+            mimeType = @"audio/mp4";
+        }
         showDocViewer = FALSE;
 
     } else if ([thisURL containsString:videoSignature]) {
