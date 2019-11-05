@@ -301,7 +301,7 @@
 
 #pragma mark - QLPreviewControllerDelegate Methods
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
 
     - (QLPreviewItemEditingMode)  previewController:(QLPreviewController *)controller editingModeForPreviewItem:(nonnull id<QLPreviewItem>)previewItem API_AVAILABLE(ios(13.0)) {
         return QLPreviewItemEditingModeUpdateContents;
