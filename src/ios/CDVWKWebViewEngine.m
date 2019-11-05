@@ -19,7 +19,7 @@
 
  /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
     By: @remoorejr
-    Date Last Revised: 11-01-2019
+    Date Last Revised: 11-05-2019
  
     Includes custom URL scheme handler for access to local device files
     Includes QuickLook for viewing local files
@@ -300,12 +300,12 @@
     }
 
 #pragma mark - QLPreviewControllerDelegate Methods
-- (QLPreviewItemEditingMode)  previewController:(QLPreviewController *)controller editingModeForPreviewItem:(nonnull id<QLPreviewItem>)previewItem {
+
+- (QLPreviewItemEditingMode)  previewController:(QLPreviewController *)controller editingModeForPreviewItem:(nonnull id<QLPreviewItem>)previewItem API_AVAILABLE(ios(13.0)) {
     return QLPreviewItemEditingModeUpdateContents;
 }
 
 #pragma mark - QLPreviewItem Methods
-
 
 - (void) webView: (WKWebView *) webView stopURLSchemeTask:(nonnull id <WKURLSchemeTask>)urlSchemeTask {
     NSLog(@"Stop called for custom URL scheme handler for alpha-local://");
