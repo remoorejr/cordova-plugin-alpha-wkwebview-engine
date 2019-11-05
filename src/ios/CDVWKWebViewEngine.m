@@ -301,9 +301,10 @@
 
 #pragma mark - QLPreviewControllerDelegate Methods
 
-- (QLPreviewItemEditingMode)  previewController:(QLPreviewController *)controller editingModeForPreviewItem:(nonnull id<QLPreviewItem>)previewItem API_AVAILABLE(ios(13.0)) {
-    return QLPreviewItemEditingModeUpdateContents;
-}
+    - (QLPreviewItemEditingMode)  previewController:(QLPreviewController *)controller editingModeForPreviewItem:(nonnull id<QLPreviewItem>)previewItem NS_AVAILABLE_IOS(13_0) {
+        return QLPreviewItemEditingModeUpdateContents;
+    }
+
 
 #pragma mark - QLPreviewItem Methods
 
@@ -311,6 +312,7 @@
     NSLog(@"Stop called for custom URL scheme handler for alpha-local://");
     _task = nil;
 }
+
 
 @end
 
