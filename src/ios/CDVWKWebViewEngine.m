@@ -110,6 +110,7 @@
     } else if ([thisURL containsString:audioSignature]) {
         thisSignature = audioSignature;
         NSString *ext = [thisURL pathExtension];
+
          if ([[ext lowercaseString] isEqualToString:@"mp3"]) {
             mimeType = @"audio/mpeg";
         } else {
