@@ -36,9 +36,15 @@ To access local video files, add the prefix:  alpha-local://video?url= to the lo
 
 To access local html files, add the prefix:  alpha-local://html?url= to the local html file name.
 
-To display an image, pdf, xlsx, doc, ppt, text, csv, RTF, Pages, Keynote, Numbers, zip, audio or video local file in a native iOS viewer (that supports pinch zoom and sharing options), add the prefix:  alpha-local://view?url= to the local pdf file name.
+To display an image, pdf, xlsx, doc, ppt, text, csv, RTF, Pages, Keynote, Numbers, zip, audio, video or usdz local file in a Quick Look native iOS viewer (that supports pinch zoom and sharing options), add the prefix:  alpha-local://view?url= to the local pdf file name.
 
+To display a directory of files that may include any of the Quick Look supported formats (listed above), add the prefix: alpha-local://viewdir?url=file:///pathToLocalFile/local/directory/.
 
+Here's an example to the localFiles/project1 directory from a test app:  : alpha-local://viewdir?url=file:///var/mobile/Containers/Data/Application/1920522B-3AA6-4BAE-8007-5B4E8AEACC14/Library/NoCloud//localFiles/project1/
+
+If the application was compiled with Xcode 11 (or greater) and the device is running iOS 13 (or greater), editing for images, movies and PDF files is supported. The edited file will overwrite the local file in this plugin version. It is up to the developer to upload the modified file if that is a requirement. The edited file can be shared via the standard iOS share menu. 
+
+-----------
 
 This plugin makes `Cordova` use the `WKWebView` component instead of the default `UIWebView` component, and is installable only on a system with the iOS 9.0 > SDK.
 
@@ -54,7 +60,7 @@ To install the current release:
     cordova create wkwvtest my.project.id wkwvtest
     cd wkwvtest
     cordova platform add ios@4
-    cordova plugin add https://github/remoorejr/cordova-plugin-alpha-wkwebview-engine.git
+    cordova plugin add https://github.com/remoorejr/cordova-plugin-alpha-wkwebview-engine.git
 
 You also must have at least Xcode 7 (iOS 9 SDK) installed. Check your Xcode version by running:
 
