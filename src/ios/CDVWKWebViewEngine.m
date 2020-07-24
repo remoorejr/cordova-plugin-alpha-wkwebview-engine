@@ -19,7 +19,7 @@
 
  /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
     By: @remoorejr
-    Date Last Revised: 11-05-2019
+    Date Last Revised: 07-24-2020
  
     Includes custom URL scheme handler for access to local device files
     Includes QuickLook for viewing local files
@@ -132,9 +132,25 @@
         thisSignature = viewDirSignature;
          mimeType = @"application/octet-stream";
         showDocViewer = TRUE;
+    
+    } else if ([thisURL hasPrefix:@"alpha-local://"]) {
+        // relative URL's
+        if ([thisURL containsString:@".html"]) {
+            mimeType = @"text/html";
+
+        } else if ([thisURL containsString:@".js"]) {
+            mimeType = @"text/javascript";
+
+        } else if ([thisURL containsString:@".css"]) {
+            mimeType = @"text/css";
+        } else {
+            mimeType = @"text/plain";
+            NSLog(@"*** Unhandled file type, %@, mimeType: %@",thisURL,mimeType);
+        }
+    } else {
+         NSLog(@"*** File signature not recognized,  %@, mimeType: %@",thisURL,mimeType);
     }
-    
-    
+     
     thisURL = [thisURL stringByReplacingOccurrencesOfString:thisSignature withString:@""];
     
     if (showDocViewer) {
@@ -263,7 +279,15 @@
             NSUInteger count = data.length;
         
             // Send data back
-            NSURLResponse *response = [[NSURLResponse alloc] initWithURL:modifiedURL MIMEType:mimeType expectedContentLength:count textEncodingName:@""];
+            // was -> NSURLResponse *response = [[NSURLResponse alloc] initWithURL:modifiedURL MIMEType:mimeType expectedContentLength:count textEncodingName:@""];
+
+             NSDictionary *headerDictionary = @{
+                @"Content-Length" : [NSString stringWithFormat:@"%lu", (unsigned long)count],
+                @"Content-Type" : mimeType,
+                @"Access-Control-Allow-Origin" : @"*"
+            };
+
+            NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:modifiedURL statusCode:200 HTTPVersion:@"HTTP/1.1" headerFields:headerDictionary];
 
             [_task didReceiveResponse: response];
             [_task didReceiveData: data];
