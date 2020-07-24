@@ -101,6 +101,10 @@
             _localFilePath = [thisURL stringByReplacingOccurrencesOfString:requestedFileName withString:@""];
             _localFilePath = [_localFilePath stringByReplacingOccurrencesOfString:thisSignature withString:@""];
         }
+     } else if  ([thisURL containsString:jpgImageSignature]) {
+        thisSignature = jpgImageSignature;
+        mimeType = @"image/jpg";
+        showDocViewer = FALSE;
 
     } else if  ([thisURL containsString:pngImageSignature]) {
         thisSignature = pngImageSignature;
