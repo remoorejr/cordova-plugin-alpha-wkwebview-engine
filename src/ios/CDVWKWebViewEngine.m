@@ -19,10 +19,11 @@
 
  /* Modified for use with Alpha Anywhere and the Alpha Anywhere Instant Update feature
     By: @remoorejr
-    Date Last Revised: 07-24-2020
+    Date Last Revised: 03-05-2021
  
     Includes custom URL scheme handler for access to local device files
     Includes QuickLook for viewing local files
+    03-05-2021: added support for SVG images
  */
 
 
@@ -78,6 +79,7 @@
     
     NSString *jpgImageSignature = @"alpha-local://jpg?url=file://";
     NSString *pngImageSignature = @"alpha-local://png?url=file://";
+    NSString *svgImageSignature = @"alpha-local://svg?url=file://";
     NSString *audioSignature =    @"alpha-local://audio?url=file://";
     NSString *videoSignature =    @"alpha-local://video?url=file://";
     NSString *htmlSignature =     @"alpha-local://html?url=file://";
@@ -110,7 +112,12 @@
         thisSignature = pngImageSignature;
         mimeType = @"image/png";
         showDocViewer = FALSE;
-
+        
+    } else if  ([thisURL containsString:svgImageSignature]) {
+        thisSignature = svgImageSignature;
+        mimeType = @"image/svg+xml";
+        showDocViewer = FALSE;
+        
     } else if ([thisURL containsString:audioSignature]) {
         thisSignature = audioSignature;
         NSString *ext = [thisURL pathExtension];

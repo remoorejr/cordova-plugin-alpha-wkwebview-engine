@@ -30,6 +30,8 @@ To access local jpg image files add the prefix:   alpha-local://jpg?url= to the 
 
 To access local png image files add the prefix:   alpha-local://png?url= to the local png file name.
 
+To access local svg image files add the prefix:   alpha-local://svg?url= to the local png file name.
+
 To access local audio files add the prefix:   alpha-local://audio?url= to the local audio file name.
 
 To access local video files, add the prefix:  alpha-local://video?url= to the local video file name.
