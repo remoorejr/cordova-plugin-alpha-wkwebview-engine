@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-alpha-wkwebview-engine",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Cordova Alpha Modified WKWebView Engine Plugin",
   "cordova": {
       "id":"cordova-plugin-alpha-wkwebview-engine",

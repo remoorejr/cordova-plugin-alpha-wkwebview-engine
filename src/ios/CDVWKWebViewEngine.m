@@ -768,6 +768,27 @@ static void * KVOContext = &KVOContext;
     NSURL* url = [navigationAction.request URL];
     CDVViewController* vc = (CDVViewController*)self.viewController;
 
+    /* Added to support for seamless iOS 13+ scheme links */
+
+    NSString *scheme = url.scheme;
+    BOOL usesTel = [scheme isEqualToString:@"tel"];
+    BOOL usesSMS = [scheme isEqualToString:@"sms"];
+    BOOL usesMail = [scheme isEqualToString:@"mailto"];
+    BOOL usesFacetime = [scheme isEqualToString:@"facetime"];
+    BOOL usesFacetimeAudio = [scheme isEqualToString:@"facetime-audio"];
+    
+    BOOL usesAppleUrlScheme = usesTel || usesSMS || usesMail || usesFacetime ||usesFacetimeAudio;
+    
+    if (usesAppleUrlScheme) {
+        UIApplication *application = [UIApplication sharedApplication];
+        [application openURL:url options:@{} completionHandler:^(BOOL success) {
+           if (success) {
+             NSLog(@"Opened %@",scheme);
+           }
+         }];
+        return decisionHandler(NO);
+    }
+
     /*
      * Give plugins the chance to handle the url
      */
